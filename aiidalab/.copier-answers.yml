@@ -1,0 +1,11 @@
+---
+# Changes here will be overwritten by Copier; NEVER EDIT MANUALLY
+_commit: 748740e
+_src_path: gh:aiidalab/aiidalab-k8s
+deployment_name: aiidalab
+image: docker.io/aiidalab/full-stack
+pullPolicy: Always
+registry_credentials: false
+registry_url:
+registry_username:
+version: latest

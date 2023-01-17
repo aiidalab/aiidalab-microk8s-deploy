@@ -1,0 +1,31 @@
+---
+singleuser:
+    image:
+        name: "docker.io/aiidalab/full-stack"
+        tag: "2022.1007"
+        pullPolicy: "Always"
+    cmd: null
+    extraEnv:
+        AIIDALAB_DEFAULT_APPS: "quantum-espresso==22.12.0"
+        JUPYTERHUB_SINGLEUSER_APP: "notebook.notebookapp.NotebookApp"
+    storage:
+        dynamic:
+            storageClass: aiidalab-storage
+hub:
+    db:
+        pvc:
+            storageClassName: aiidalab-storage
+    extraConfig:
+        myConfig: |
+            c.KubeSpawner.http_timeout = 120
+    config:
+        Authenticator:
+            admin_users:
+                - admin
+                - jyu
+        NativeAuthenticator:
+            ask_email_on_signup: true
+            check_common_password: true
+            minimum_password_length: 10
+        JupyterHub:
+            authenticator_class: nativeauthenticator.NativeAuthenticator
