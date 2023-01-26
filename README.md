@@ -45,11 +45,11 @@ sudo apt install nginx
 ```
 Next, remove the default config and replace it with the aiidalab config:
 ```console
-rm /etc/nginx/sites-enabled/default
-sudo cp /var/aiidalab-for-theos/etc/nginx/aiidalab-for-psi /etc/nginx/sites-enabled/
+sudo rm /etc/nginx/sites-enabled/default
+sudo cp ~/aiidalab-microk8s-deploy/etc/nginx/aiidalab-microk8s /etc/nginx/sites-enabled/
 ```
 If needed, replace the IP address in the
-`/etc/nginx/sites-enabled/aiidalab-for-psi` config file on the line that
+`/etc/nginx/sites-enabled/aiidalab-microk8s` config file on the line that
 states `proxy_pass` with the IP address you obtained for the public proxy.
 
 Finally, restart the proxy with
