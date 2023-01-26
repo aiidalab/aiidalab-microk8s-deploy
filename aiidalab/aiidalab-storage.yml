@@ -8,7 +8,7 @@ metadata:
             - name: StorageType
               value: "hostpath"
             - name: BasePath
-              value: /var/aiidalab-for-theos/storage
+              value: /var/aiidalab-microk8s/storage
         openebs.io/cas-type: local
 provisioner: openebs.io/local
 reclaimPolicy: Delete

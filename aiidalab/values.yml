@@ -1,16 +1,23 @@
 ---
+proxy:
+  service:
+    loadBalancerIP: 10.64.140.44
 singleuser:
     image:
         name: "docker.io/aiidalab/full-stack"
-        tag: "2022.1007"
+        tag: "2023.1008"
         pullPolicy: "Always"
     cmd: null
     extraEnv:
-        AIIDALAB_DEFAULT_APPS: "quantum-espresso==22.12.0"
+        AIIDALAB_DEFAULT_APPS: "quantum-espresso==23.1.0b0"
         JUPYTERHUB_SINGLEUSER_APP: "notebook.notebookapp.NotebookApp"
     storage:
         dynamic:
             storageClass: aiidalab-storage
+    memory:
+        guarantee: 2G
+    cpu:
+        guarantee: 2
 hub:
     db:
         pvc:
