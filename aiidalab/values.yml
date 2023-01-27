@@ -19,12 +19,70 @@ singleuser:
     cpu:
         guarantee: 2
 hub:
+    extraEnv:
+        JUPYTERHUB_CRYPT_KEY: {{ jh_crypt_key }}
     db:
         pvc:
             storageClassName: aiidalab-storage
     extraConfig:
         myConfig: |
-            c.KubeSpawner.http_timeout = 120
+            from typing import Tuple
+            from oauthenticator.generic import GenericOAuthenticator
+            from tornado.httpclient import HTTPRequest, AsyncHTTPClient
+            from jupyterhub.handlers.base import BaseHandler
+
+            # add route for terms & conditions
+            class TermsConditionsHandler(BaseHandler):
+
+                def get(self): # pylint: disable=arguments-differ
+                    """Terms and conditions"""
+                    # Note: This placeholder serves a demonstration for adding
+                    # additional routes and associated handlers.
+                    self.write("This is the terms and conditions of this service.")
+
+            class MarketplaceOAuthenticator(GenericOAuthenticator):
+                """A GenericOAuthenticator with assigned LoginHandler containing Marketplace specific urls"""
+
+                async def pre_spawn_start(self, user, spawner):
+                    """Pass upstream_token to spawner via environment variable"""
+                    auth_state = await user.get_auth_state()
+                    if not auth_state:
+                        # auth_state not enabled
+                        return
+                    spawner.environment['MP_HOST'] = "https://{{ marketplace_host }}"
+                    spawner.environment['MP_ACCESS_TOKEN'] = auth_state['access_token']
+                    spawner.environment['MP_REFRESH_TOKEN'] = auth_state['refresh_token']
+
+            c.JupyterHub.authenticator_class = MarketplaceOAuthenticator
+            c.JupyterHub.admin_access = True
+            c.JupyterHub.extra_handlers = [
+                (
+                r'/termsAndConditions',
+                TermsConditionsHandler,
+                ),
+            ]
+
+            c.MarketplaceOAuthenticator.enable_auth_state = True
+            c.MarketplaceOAuthenticator.client_id = "{{ oauth_client_id }}"
+            c.MarketplaceOAuthenticator.client_secret = "{{ oauth_client_secret }}"
+            c.MarketplaceOAuthenticator.oauth_callback_url = 'https://{{ jh_host }}/hub/oauth_callback'
+
+            c.MarketplaceOAuthenticator.userdata_url = "https://{{ marketplace_host }}/auth/realms/marketplace/protocol/openid-connect/userinfo"
+            c.MarketplaceOAuthenticator.username_key = "preferred_username"
+            c.MarketplaceOAuthenticator.token_url = "https://{{ marketplace_host }}/auth/realms/marketplace/protocol/openid-connect/token"
+            c.MarketplaceOAuthenticator.authorize_url = "https://{{ marketplace_host }}/auth/realms/marketplace/protocol/openid-connect/auth"
+            c.MarketplaceOAuthenticator.scope = {{ oauth_scope }}
+            c.MarketplaceOAuthenticator.admin_users = {{ admin_users }}
+
+            c.KubeSpawner.http_timeout = 600
+
+            # insert template path for custom login template
+            c.JupyterHub.template_paths.insert(0, "/etc/jupyterhub/templates")
+
+            # Override default logo
+            import urllib.request
+            urllib.request.urlretrieve("https://github.com/aiidalab/ansible-role-aiidalab-server/raw/master/files/aiidalab_wide.png", "aiidalab-logo.png")
+            c.JupyterHub.logo_file = "aiidalab-logo.png"
     config:
         Authenticator:
             admin_users:

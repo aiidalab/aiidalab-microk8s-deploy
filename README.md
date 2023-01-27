@@ -60,6 +60,12 @@ sudo systemctl restart nginx
 **Congratulations! The AiiDAlab server should now be accessible at
 http://dev-aiidalab.psi.ch !**
 
+## Https
+
+letscrypt..
+
+https://jupyterhub.readthedocs.io/en/stable/reference/config-proxy.html
+
 ## Additional notes
 
 - You can adjust the deployment by directly editing the
