@@ -1,14 +1,18 @@
-# AiiDAlab deployment for MSD (PSI)
+# AiiDAlab deployment for small group using Microk8s
 
 This repository contains documentation and scripts for the AiiDAlab
- deployment for the MSD group at PSI.
+ deployment using Microk8s.
+It is a suitable deployment for small size group with around 10-50 people.
 
-The deployment is currently hosted on the dev-aiidalab virtual machine.
+The deployment is currently used by:
+- AiiDAlab deployment for EPFL THEOS group (http://theos7.epfl.ch)
+- AiiDAlab deployment for PSI MSD group (https://dev-aiidalab.psi.ch)
+- AiiDAlab deployment for EU-MarketPlace project (https://materials-marketplace.aiidalab.net/)
 
 ## Instructions to setup a new deployment
 
 To create a new deployment on an Ubuntu Linux virtual machine
-(tested with Ubuntu 20.04):
+(tested with Ubuntu 20.04LTS and 22.04LTS):
 
 ### Install microk8s with the following steps
 
@@ -22,7 +26,7 @@ might work as well.
 ### Create the deployment directory with the following commands:
 ```console
 cd /var/
-sudo git clone https://github.com/csadorf/aiidalab-microk8s-deploy.git
+sudo git clone https://github.com/aiidalab/aiidalab-microk8s-deploy.git
 ```
 
 ### Deploy AiiDAlab with
@@ -32,24 +36,66 @@ cd /var/aiidalab-microk8s-deploy
 ./install.sh
 ```
 
-### Configure nginx as reverse proxy to make AiiDAlab accessible.
+### HTTPS cert and configure nginx
 
-First, obtain the external ip address of the public proxy with
+If your machine is in the internal network, you probably don't need the HTTPS setup for security.
+Please skip the HTTPS setup and go to reverse proxy using the http-only setup.
+
+If you really want to set the HTTPS for the internal machine, you can have a look at [set-up-lets-encrypt-on-intranet-website](https://davidaugustat.com/web/set-up-lets-encrypt-on-intranet-website).
+
+#### HTTPS with Let’s Encrypt SSL
+
+Open a terminal and execute the below command to install certbot:
+
+```
+sudo snap install --classic certbot 
+```
+
+Now, You can request SSL certificates from Let’s encrypt based on the web server.
+You can use `--standalone` option to complete the domain validation by stating a dummy web server. This option needs to bind to port 80 in order to perform domain validation.
+
+> **Warning**
+> Before generate the SSL certificate please remember to stop the service running on port 80.
+> Here in all our deployment we run `sudo systemctl stop nginx`.
+
+Running following command to generate the SSL cert,
+
+```bash
+sudo certbot certonly --standalone 
+```
+
+#### Nginx as reverse proxy to make AiiDAlab accessible.
+
+Obtain the external ip address of the public proxy with
 ```console
 microk8s.kubectl get svc proxy-public
 ```
+
+We hardcode the loaderbalance ip for proxy so the ip should be `10.64.140.44`.
 
 Then, install nginx, with
 ```console
 sudo apt install nginx
 ```
-Next, remove the default config and replace it with the aiidalab config:
+
+Next, replace all `aiidalab.example.net` with your own domain name.
+
+If only http is enough running
+
 ```console
-sudo rm /etc/nginx/sites-enabled/default
-sudo cp ~/aiidalab-microk8s-deploy/etc/nginx/aiidalab-microk8s /etc/nginx/sites-enabled/
+sudo cp /var/aiidalab-microk8s-deploy/etc/nginx/aiidalab-microk8s-http-only /etc/nginx/sites-available/
+sudo ln -sf /etc/nginx/sites-available/aiidalab-microk8s-http-only /etc/nginx/sites-enabled/default
 ```
+
+For HTTPS access,
+
+```console
+sudo cp /var/aiidalab-microk8s-deploy/etc/nginx/aiidalab-microk8s-https /etc/nginx/sites-available/
+sudo ln -sf /etc/nginx/sites-available/aiidalab-microk8s-https /etc/nginx/sites-enabled/default
+```
+
 If needed, replace the IP address in the
-`/etc/nginx/sites-enabled/aiidalab-microk8s` config file on the line that
+`/etc/nginx/sites-enabled/default` config file on the line that
 states `proxy_pass` with the IP address you obtained for the public proxy.
 
 Finally, restart the proxy with
@@ -58,7 +104,7 @@ sudo systemctl restart nginx
 ```
 
 **Congratulations! The AiiDAlab server should now be accessible at
-http://dev-aiidalab.psi.ch !**
+your domain !**
 
 ## Additional notes
 
@@ -77,5 +123,6 @@ user management with the native authenticator.
 
 ## Troubleshooting
 
-The `microk8s` command use ip that can not be access, the solution is put the hostname of the machine into `/etc/hosts`.
-https://stackoverflow.com/questions/50468354/kubedns-error-server-misbehaving
+On some machine is the localhost name not properly set when first time the machine setup, the `microk8s` command use ip that may not accessable. 
+The solution is putting the hostname of the machine into `/etc/hosts`.
+Check https://stackoverflow.com/questions/50468354/kubedns-error-server-misbehaving for more.
