@@ -126,3 +126,4 @@ user management with the native authenticator.
 On some machine is the localhost name not properly set when first time the machine setup, the `microk8s` command use ip that may not accessable. 
 The solution is putting the hostname of the machine into `/etc/hosts`.
 Check https://stackoverflow.com/questions/50468354/kubedns-error-server-misbehaving for more.
+
