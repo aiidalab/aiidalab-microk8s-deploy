@@ -1,13 +1,13 @@
 ---
 proxy:
-  service:
-    loadBalancerIP: 10.64.140.44
+    service:
+        loadBalancerIP: 10.64.140.44
 singleuser:
     image:
         name: "docker.io/aiidalab/full-stack"
         tag: "2023.1008"
         pullPolicy: "Always"
-    cmd: null
+    cmd:
     extraEnv:
         AIIDALAB_DEFAULT_APPS: "quantum-espresso==23.1.0"
         JUPYTERHUB_SINGLEUSER_APP: "notebook.notebookapp.NotebookApp"

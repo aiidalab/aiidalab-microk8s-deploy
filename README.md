@@ -48,7 +48,7 @@ If you really want to set the HTTPS for the internal machine, you can have a loo
 Open a terminal and execute the below command to install certbot:
 
 ```
-sudo snap install --classic certbot 
+sudo snap install --classic certbot
 ```
 
 Now, You can request SSL certificates from Let’s encrypt based on the web server.
@@ -61,7 +61,7 @@ You can use `--standalone` option to complete the domain validation by stating a
 Running following command to generate the SSL cert,
 
 ```bash
-sudo certbot certonly --standalone 
+sudo certbot certonly --standalone
 ```
 
 #### Nginx as reverse proxy to make AiiDAlab accessible.
@@ -123,7 +123,6 @@ user management with the native authenticator.
 
 ## Troubleshooting
 
-On some machine is the localhost name not properly set when first time the machine setup, the `microk8s` command use ip that may not accessable. 
+On some machine is the localhost name not properly set when first time the machine setup, the `microk8s` command use ip that may not accessable.
 The solution is putting the hostname of the machine into `/etc/hosts`.
 Check https://stackoverflow.com/questions/50468354/kubedns-error-server-misbehaving for more.
-
