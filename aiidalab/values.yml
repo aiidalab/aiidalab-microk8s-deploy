@@ -9,7 +9,7 @@ singleuser:
         pullPolicy: "Always"
     cmd: null
     extraEnv:
-        AIIDALAB_DEFAULT_APPS: "quantum-espresso==23.1.0b0"
+        AIIDALAB_DEFAULT_APPS: "quantum-espresso==23.1.0"
         JUPYTERHUB_SINGLEUSER_APP: "notebook.notebookapp.NotebookApp"
     storage:
         dynamic:
@@ -24,15 +24,26 @@ hub:
             storageClassName: aiidalab-storage
     extraConfig:
         myConfig: |
-            c.KubeSpawner.http_timeout = 120
+            c.KubeSpawner.http_timeout = 500
+        logoConfig: |
+            import urllib.request
+            urllib.request.urlretrieve("https://github.com/aiidalab/ansible-role-aiidalab-server/raw/master/files/aiidalab_wide.png", "aiidalab-logo.png")
+            c.JupyterHub.logo_file = "/srv/jupyterhub/aiidalab-logo.png"
+
     config:
         Authenticator:
             admin_users:
                 - admin
-                - jyu
         NativeAuthenticator:
             ask_email_on_signup: true
             check_common_password: true
             minimum_password_length: 10
         JupyterHub:
             authenticator_class: nativeauthenticator.NativeAuthenticator
+# removing inactive pods (=no response from the user's browser).
+cull:
+    enabled: true
+    # timeout = 2h
+    timeout: 7200
+    # check every 10 minutes
+    every: 600
